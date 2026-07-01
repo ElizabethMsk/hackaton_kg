@@ -1,0 +1,302 @@
+[
+  {
+    "text": "МАТЕРИАЛЫ",
+    "label": "ORG",
+    "start": 36,
+    "end": 45
+  },
+  {
+    "text": "ТЕХНИКА",
+    "label": "ORG",
+    "start": 47,
+    "end": 54
+  },
+  {
+    "text": "ТЕХНОЛОГИИ",
+    "label": "ORG",
+    "start": 57,
+    "end": 67
+  },
+  {
+    "text": "СПЛАВОВ\nС ТИТАНОВЫМИ СПЛАВАМИ",
+    "label": "ORG",
+    "start": 133,
+    "end": 162
+  },
+  {
+    "text": "Ситников Илья Владимирович",
+    "label": "PER",
+    "start": 163,
+    "end": 189
+  },
+  {
+    "text": "Саломатова",
+    "label": "PER",
+    "start": 230,
+    "end": 240
+  },
+  {
+    "text": "Екатерина Сергеевна",
+    "label": "PER",
+    "start": 241,
+    "end": 260
+  },
+  {
+    "text": "Пермский национальный исследовательский\nполитехнический университет",
+    "label": "ORG",
+    "start": 305,
+    "end": 372
+  },
+  {
+    "text": "Пермь",
+    "label": "LOC",
+    "start": 376,
+    "end": 381
+  },
+  {
+    "text": "Россия",
+    "label": "LOC",
+    "start": 383,
+    "end": 389
+  },
+  {
+    "text": "Саломатова Е.С. СВАРИВАЕМОСТЬ ЖАРОПРОЧНЫХ НИКЕЛЕВЫХ",
+    "label": "PER",
+    "start": 405,
+    "end": 456
+  },
+  {
+    "text": "СПЛАВАМИ",
+    "label": "ORG",
+    "start": 478,
+    "end": 486
+  },
+  {
+    "text": "СОВРЕМЕННЫЕ",
+    "label": "ORG",
+    "start": 2351,
+    "end": 2362
+  },
+  {
+    "text": "МАТЕРИАЛЫ",
+    "label": "ORG",
+    "start": 2363,
+    "end": 2372
+  },
+  {
+    "text": "ТЕХНИКА",
+    "label": "ORG",
+    "start": 2374,
+    "end": 2381
+  },
+  {
+    "text": "ТЕХНОЛОГИИ",
+    "label": "ORG",
+    "start": 2384,
+    "end": 2394
+  },
+  {
+    "text": "Al",
+    "label": "ORG",
+    "start": 3380,
+    "end": 3382
+  },
+  {
+    "text": "Ti",
+    "label": "ORG",
+    "start": 3385,
+    "end": 3387
+  },
+  {
+    "text": "Сплав\nAl Ti\nХорошо",
+    "label": "PER",
+    "start": 3450,
+    "end": 3468
+  },
+  {
+    "text": "МАТЕРИАЛЫ",
+    "label": "ORG",
+    "start": 4515,
+    "end": 4524
+  },
+  {
+    "text": "ТЕХНИКА",
+    "label": "ORG",
+    "start": 4526,
+    "end": 4533
+  },
+  {
+    "text": "ТЕХНОЛОГИИ",
+    "label": "ORG",
+    "start": 4536,
+    "end": 4546
+  },
+  {
+    "text": "Титан",
+    "label": "LOC",
+    "start": 6155,
+    "end": 6160
+  },
+  {
+    "text": "СОВРЕМЕННЫЕ",
+    "label": "ORG",
+    "start": 7201,
+    "end": 7212
+  },
+  {
+    "text": "МАТЕРИАЛЫ",
+    "label": "ORG",
+    "start": 7213,
+    "end": 7222
+  },
+  {
+    "text": "ТЕХНИКА",
+    "label": "ORG",
+    "start": 7224,
+    "end": 7231
+  },
+  {
+    "text": "ТЕХНОЛОГИИ",
+    "label": "ORG",
+    "start": 7234,
+    "end": 7244
+  },
+  {
+    "text": "Будкин Ю.В. Электронно",
+    "label": "PER",
+    "start": 8053,
+    "end": 8075
+  },
+  {
+    "text": "Будкин Ю.В. Получение",
+    "label": "PER",
+    "start": 8219,
+    "end": 8240
+  },
+  {
+    "text": "Николаев Г.А. Сварка",
+    "label": "PER",
+    "start": 8342,
+    "end": 8362
+  },
+  {
+    "text": "Аку-\nлова А.И.-М.",
+    "label": "ORG",
+    "start": 8418,
+    "end": 8435
+  },
+  {
+    "text": "Пермь",
+    "label": "LOC",
+    "start": 8574,
+    "end": 8579
+  },
+  {
+    "text": "Перм",
+    "label": "LOC",
+    "start": 8588,
+    "end": 8592
+  },
+  {
+    "text": "Волченко В.Н. Сварка",
+    "label": "PER",
+    "start": 8642,
+    "end": 8662
+  },
+  {
+    "text": "Э.Л. Макарова-М.",
+    "label": "PER",
+    "start": 8753,
+    "end": 8769
+  },
+  {
+    "text": "Сорокин Л.И. Свариваемость",
+    "label": "PER",
+    "start": 8819,
+    "end": 8845
+  },
+  {
+    "text": "Сорокин Л.И. Свариваемость",
+    "label": "PER",
+    "start": 8945,
+    "end": 8971
+  },
+  {
+    "text": "Рябов В.Р. Сварка разнородных металлов и сплавов",
+    "label": "PER",
+    "start": 9073,
+    "end": 9121
+  },
+  {
+    "text": "Sitnikov Ilya Vladimirovich",
+    "label": "ORG",
+    "start": 9158,
+    "end": 9185
+  },
+  {
+    "text": "Perm national research polytechnic university",
+    "label": "ORG",
+    "start": 9223,
+    "end": 9268
+  },
+  {
+    "text": "Perm",
+    "label": "ORG",
+    "start": 9270,
+    "end": 9274
+  },
+  {
+    "text": "Russia\nSalomatova Ekaterina Sergeevna",
+    "label": "ORG",
+    "start": 9276,
+    "end": 9313
+  },
+  {
+    "text": "Cand.Tech.Sci",
+    "label": "ORG",
+    "start": 9315,
+    "end": 9328
+  },
+  {
+    "text": "associate professor\n(e-mail",
+    "label": "ORG",
+    "start": 9331,
+    "end": 9358
+  },
+  {
+    "text": "Perm national research polytechnic university",
+    "label": "ORG",
+    "start": 9379,
+    "end": 9424
+  },
+  {
+    "text": "Perm",
+    "label": "ORG",
+    "start": 9426,
+    "end": 9430
+  },
+  {
+    "text": "Russia\nWELDABILITI OF HEAT RFESISTING NICKEL ALLOYS WITH\nTITANIUM ALLOYS\nAbstract",
+    "label": "ORG",
+    "start": 9432,
+    "end": 9513
+  },
+  {
+    "text": "dissimilar materials",
+    "label": "ORG",
+    "start": 9722,
+    "end": 9742
+  },
+  {
+    "text": "titanium alloys",
+    "label": "ORG",
+    "start": 9744,
+    "end": 9759
+  },
+  {
+    "text": "heat resisting\nsteel",
+    "label": "ORG",
+    "start": 9761,
+    "end": 9781
+  }
+]

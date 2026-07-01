@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1>Knowledge Graph - Материалы</h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1>Knowledge Graph - Материалы</h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #222222;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"font": {"color": "white"}, "group": "ORG", "id": 0, "label": "\u041c\u0410\u0422\u0415\u0420\u0418\u0410\u041b\u042b", "shape": "dot", "size": 25, "title": "ORG: \u041c\u0410\u0422\u0415\u0420\u0418\u0410\u041b\u042b"}, {"font": {"color": "white"}, "group": "ORG", "id": 1, "label": "\u0422\u0415\u0425\u041d\u0418\u041a\u0410", "shape": "dot", "size": 25, "title": "ORG: \u0422\u0415\u0425\u041d\u0418\u041a\u0410"}, {"font": {"color": "white"}, "group": "ORG", "id": 2, "label": "\u0422\u0415\u0425\u041d\u041e\u041b\u041e\u0413\u0418\u0418", "shape": "dot", "size": 25, "title": "ORG: \u0422\u0415\u0425\u041d\u041e\u041b\u041e\u0413\u0418\u0418"}, {"font": {"color": "white"}, "group": "ORG", "id": 3, "label": "\u0421\u041f\u041b\u0410\u0412\u041e\u0412\n\u0421 \u0422\u0418\u0422\u0410\u041d\u041e\u0412\u042b\u041c\u0418 \u0421\u041f\u041b\u0410\u0412\u0410\u041c\u0418", "shape": "dot", "size": 25, "title": "ORG: \u0421\u041f\u041b\u0410\u0412\u041e\u0412\n\u0421 \u0422\u0418\u0422\u0410\u041d\u041e\u0412\u042b\u041c\u0418 \u0421\u041f\u041b\u0410\u0412\u0410\u041c\u0418"}, {"font": {"color": "white"}, "group": "PER", "id": 4, "label": "\u0421\u0438\u0442\u043d\u0438\u043a\u043e\u0432 \u0418\u043b\u044c\u044f \u0412\u043b\u0430\u0434\u0438\u043c\u0438\u0440\u043e\u0432\u0438\u0447", "shape": "dot", "size": 25, "title": "PER: \u0421\u0438\u0442\u043d\u0438\u043a\u043e\u0432 \u0418\u043b\u044c\u044f \u0412\u043b\u0430\u0434\u0438\u043c\u0438\u0440\u043e\u0432\u0438\u0447"}, {"font": {"color": "white"}, "group": "PER", "id": 5, "label": "\u0421\u0430\u043b\u043e\u043c\u0430\u0442\u043e\u0432\u0430", "shape": "dot", "size": 25, "title": "PER: \u0421\u0430\u043b\u043e\u043c\u0430\u0442\u043e\u0432\u0430"}, {"font": {"color": "white"}, "group": "PER", "id": 6, "label": "\u0415\u043a\u0430\u0442\u0435\u0440\u0438\u043d\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043d\u0430", "shape": "dot", "size": 25, "title": "PER: \u0415\u043a\u0430\u0442\u0435\u0440\u0438\u043d\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043d\u0430"}, {"font": {"color": "white"}, "group": "ORG", "id": 7, "label": "\u041f\u0435\u0440\u043c\u0441\u043a\u0438\u0439 \u043d\u0430\u0446\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u044b\u0439 \u0438\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u0441\u043a\u0438\u0439\n\u043f\u043e\u043b\u0438\u0442\u0435\u0445\u043d\u0438\u0447", "shape": "dot", "size": 25, "title": "ORG: \u041f\u0435\u0440\u043c\u0441\u043a\u0438\u0439 \u043d\u0430\u0446\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u044b\u0439 \u0438\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u0441\u043a\u0438\u0439\n\u043f\u043e\u043b\u0438\u0442\u0435\u0445\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0443\u043d\u0438\u0432\u0435\u0440\u0441\u0438\u0442\u0435\u0442"}, {"font": {"color": "white"}, "group": "LOC", "id": 8, "label": "\u041f\u0435\u0440\u043c\u044c", "shape": "dot", "size": 25, "title": "LOC: \u041f\u0435\u0440\u043c\u044c"}, {"font": {"color": "white"}, "group": "LOC", "id": 9, "label": "\u0420\u043e\u0441\u0441\u0438\u044f", "shape": "dot", "size": 25, "title": "LOC: \u0420\u043e\u0441\u0441\u0438\u044f"}, {"font": {"color": "white"}, "group": "PER", "id": 10, "label": "\u0421\u0430\u043b\u043e\u043c\u0430\u0442\u043e\u0432\u0430 \u0415.\u0421. \u0421\u0412\u0410\u0420\u0418\u0412\u0410\u0415\u041c\u041e\u0421\u0422\u042c \u0416\u0410\u0420\u041e\u041f\u0420\u041e\u0427\u041d\u042b\u0425 \u041d\u0418\u041a\u0415\u041b\u0415\u0412\u042b", "shape": "dot", "size": 25, "title": "PER: \u0421\u0430\u043b\u043e\u043c\u0430\u0442\u043e\u0432\u0430 \u0415.\u0421. \u0421\u0412\u0410\u0420\u0418\u0412\u0410\u0415\u041c\u041e\u0421\u0422\u042c \u0416\u0410\u0420\u041e\u041f\u0420\u041e\u0427\u041d\u042b\u0425 \u041d\u0418\u041a\u0415\u041b\u0415\u0412\u042b\u0425"}, {"font": {"color": "white"}, "group": "ORG", "id": 11, "label": "\u0421\u041f\u041b\u0410\u0412\u0410\u041c\u0418", "shape": "dot", "size": 25, "title": "ORG: \u0421\u041f\u041b\u0410\u0412\u0410\u041c\u0418"}, {"font": {"color": "white"}, "group": "ORG", "id": 12, "label": "\u0421\u041e\u0412\u0420\u0415\u041c\u0415\u041d\u041d\u042b\u0415", "shape": "dot", "size": 25, "title": "ORG: \u0421\u041e\u0412\u0420\u0415\u041c\u0415\u041d\u041d\u042b\u0415"}, {"font": {"color": "white"}, "group": "ORG", "id": 13, "label": "Al", "shape": "dot", "size": 25, "title": "ORG: Al"}, {"font": {"color": "white"}, "group": "ORG", "id": 14, "label": "Ti", "shape": "dot", "size": 25, "title": "ORG: Ti"}, {"font": {"color": "white"}, "group": "PER", "id": 15, "label": "\u0421\u043f\u043b\u0430\u0432\nAl Ti\n\u0425\u043e\u0440\u043e\u0448\u043e", "shape": "dot", "size": 25, "title": "PER: \u0421\u043f\u043b\u0430\u0432\nAl Ti\n\u0425\u043e\u0440\u043e\u0448\u043e"}, {"font": {"color": "white"}, "group": "LOC", "id": 16, "label": "\u0422\u0438\u0442\u0430\u043d", "shape": "dot", "size": 25, "title": "LOC: \u0422\u0438\u0442\u0430\u043d"}, {"font": {"color": "white"}, "group": "PER", "id": 17, "label": "\u0411\u0443\u0434\u043a\u0438\u043d \u042e.\u0412. \u042d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u043d\u043e", "shape": "dot", "size": 25, "title": "PER: \u0411\u0443\u0434\u043a\u0438\u043d \u042e.\u0412. \u042d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u043d\u043e"}, {"font": {"color": "white"}, "group": "PER", "id": 18, "label": "\u0411\u0443\u0434\u043a\u0438\u043d \u042e.\u0412. \u041f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u0435", "shape": "dot", "size": 25, "title": "PER: \u0411\u0443\u0434\u043a\u0438\u043d \u042e.\u0412. \u041f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u0435"}, {"font": {"color": "white"}, "group": "PER", "id": 19, "label": "\u041d\u0438\u043a\u043e\u043b\u0430\u0435\u0432 \u0413.\u0410. \u0421\u0432\u0430\u0440\u043a\u0430", "shape": "dot", "size": 25, "title": "PER: \u041d\u0438\u043a\u043e\u043b\u0430\u0435\u0432 \u0413.\u0410. \u0421\u0432\u0430\u0440\u043a\u0430"}, {"font": {"color": "white"}, "group": "ORG", "id": 20, "label": "\u0410\u043a\u0443-\n\u043b\u043e\u0432\u0430 \u0410.\u0418.-\u041c.", "shape": "dot", "size": 25, "title": "ORG: \u0410\u043a\u0443-\n\u043b\u043e\u0432\u0430 \u0410.\u0418.-\u041c."}, {"font": {"color": "white"}, "group": "LOC", "id": 21, "label": "\u041f\u0435\u0440\u043c", "shape": "dot", "size": 25, "title": "LOC: \u041f\u0435\u0440\u043c"}, {"font": {"color": "white"}, "group": "PER", "id": 22, "label": "\u0412\u043e\u043b\u0447\u0435\u043d\u043a\u043e \u0412.\u041d. \u0421\u0432\u0430\u0440\u043a\u0430", "shape": "dot", "size": 25, "title": "PER: \u0412\u043e\u043b\u0447\u0435\u043d\u043a\u043e \u0412.\u041d. \u0421\u0432\u0430\u0440\u043a\u0430"}, {"font": {"color": "white"}, "group": "PER", "id": 23, "label": "\u042d.\u041b. \u041c\u0430\u043a\u0430\u0440\u043e\u0432\u0430-\u041c.", "shape": "dot", "size": 25, "title": "PER: \u042d.\u041b. \u041c\u0430\u043a\u0430\u0440\u043e\u0432\u0430-\u041c."}, {"font": {"color": "white"}, "group": "PER", "id": 24, "label": "\u0421\u043e\u0440\u043e\u043a\u0438\u043d \u041b.\u0418. \u0421\u0432\u0430\u0440\u0438\u0432\u0430\u0435\u043c\u043e\u0441\u0442\u044c", "shape": "dot", "size": 25, "title": "PER: \u0421\u043e\u0440\u043e\u043a\u0438\u043d \u041b.\u0418. \u0421\u0432\u0430\u0440\u0438\u0432\u0430\u0435\u043c\u043e\u0441\u0442\u044c"}, {"font": {"color": "white"}, "group": "PER", "id": 25, "label": "\u0420\u044f\u0431\u043e\u0432 \u0412.\u0420. \u0421\u0432\u0430\u0440\u043a\u0430 \u0440\u0430\u0437\u043d\u043e\u0440\u043e\u0434\u043d\u044b\u0445 \u043c\u0435\u0442\u0430\u043b\u043b\u043e\u0432 \u0438 \u0441\u043f\u043b\u0430\u0432\u043e\u0432", "shape": "dot", "size": 25, "title": "PER: \u0420\u044f\u0431\u043e\u0432 \u0412.\u0420. \u0421\u0432\u0430\u0440\u043a\u0430 \u0440\u0430\u0437\u043d\u043e\u0440\u043e\u0434\u043d\u044b\u0445 \u043c\u0435\u0442\u0430\u043b\u043b\u043e\u0432 \u0438 \u0441\u043f\u043b\u0430\u0432\u043e\u0432"}, {"font": {"color": "white"}, "group": "ORG", "id": 26, "label": "Sitnikov Ilya Vladimirovich", "shape": "dot", "size": 25, "title": "ORG: Sitnikov Ilya Vladimirovich"}, {"font": {"color": "white"}, "group": "ORG", "id": 27, "label": "Perm national research polytechnic university", "shape": "dot", "size": 25, "title": "ORG: Perm national research polytechnic university"}, {"font": {"color": "white"}, "group": "ORG", "id": 28, "label": "Perm", "shape": "dot", "size": 25, "title": "ORG: Perm"}, {"font": {"color": "white"}, "group": "ORG", "id": 29, "label": "Russia\nSalomatova Ekaterina Sergeevna", "shape": "dot", "size": 25, "title": "ORG: Russia\nSalomatova Ekaterina Sergeevna"}, {"font": {"color": "white"}, "group": "ORG", "id": 30, "label": "Cand.Tech.Sci", "shape": "dot", "size": 25, "title": "ORG: Cand.Tech.Sci"}, {"font": {"color": "white"}, "group": "ORG", "id": 31, "label": "associate professor\n(e-mail", "shape": "dot", "size": 25, "title": "ORG: associate professor\n(e-mail"}, {"font": {"color": "white"}, "group": "ORG", "id": 32, "label": "Russia\nWELDABILITI OF HEAT RFESISTING NICKEL ALLOY", "shape": "dot", "size": 25, "title": "ORG: Russia\nWELDABILITI OF HEAT RFESISTING NICKEL ALLOYS WITH\nTITANIUM ALLOYS\nAbstract"}, {"font": {"color": "white"}, "group": "ORG", "id": 33, "label": "dissimilar materials", "shape": "dot", "size": 25, "title": "ORG: dissimilar materials"}, {"font": {"color": "white"}, "group": "ORG", "id": 34, "label": "titanium alloys", "shape": "dot", "size": 25, "title": "ORG: titanium alloys"}, {"font": {"color": "white"}, "group": "ORG", "id": 35, "label": "heat resisting\nsteel", "shape": "dot", "size": 25, "title": "ORG: heat resisting\nsteel"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"nodes": {"font": {"size": 14, "color": "#ffffff"}}, "physics": {"forceAtlas2Based": {"gravitationalConstant": -50, "centralGravity": 0.005, "springLength": 100, "springConstant": 0.18}, "maxVelocity": 50, "solver": "forceAtlas2Based", "timestep": 0.35, "stabilization": {"iterations": 150}}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

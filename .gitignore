@@ -1,0 +1,48 @@
+# Виртуальное окружение Python
+venv/
+.venv/
+env/
+
+# База данных векторов (большие файлы)
+vector_db/
+chroma/
+
+# Скомпилированные файлы Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Файлы конфигурации с паролями
+config.py
+.env
+*.env
+
+# IDE файлы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Операционная система
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Временные файлы
+*.tmp
+*.bak
+*.log
+
+# Jupyter notebooks (если будете использовать)
+.ipynb_checkpoints/
+
+# Результаты работы скриптов (опционально)
+# text.json
+# entities.json
+# graph_visualization.html
