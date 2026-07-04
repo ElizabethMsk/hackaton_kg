@@ -65,11 +65,13 @@ function translateGroup(group) {
 }
 
 function App() {
-  const [query,        setQuery]        = useState("");
-  const [results,      setResults]      = useState(null);
-  const [loading,      setLoading]      = useState(false);
-  const [selectedNode, setSelectedNode] = useState(null);
-  const [graphData,    setGraphData]    = useState({ nodes: [], edges: [] });
+  const [query,         setQuery]         = useState("");
+  const [results,       setResults]       = useState(null);
+  const [loading,       setLoading]       = useState(false);
+  const [answer,        setAnswer]        = useState(null);
+  const [loadingAnswer, setLoadingAnswer] = useState(false);
+  const [selectedNode,  setSelectedNode]  = useState(null);
+  const [graphData,     setGraphData]     = useState({ nodes: [], edges: [] });
 
   const graphRef   = useRef(null);
   const networkRef = useRef(null);
@@ -126,6 +128,7 @@ function App() {
     const q = query.trim();
     if (!q) {
       setResults([]);
+      setAnswer(null);
       if (networkRef.current) {
         networkRef.current.setData({
           nodes: buildVisNodes(graphData.nodes, null),
@@ -143,6 +146,7 @@ function App() {
     }
 
     setLoading(true);
+    setAnswer(null);
     try {
       const res  = await fetch(`${API_URL}/search`, {
         method:  "POST",
@@ -158,12 +162,34 @@ function App() {
     }
   }
 
+  async function handleAsk() {
+    const q = query.trim();
+    if (!q) return;
+
+    setLoadingAnswer(true);
+    setAnswer(null);
+    try {
+      const res  = await fetch(`${API_URL}/ask`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ query: q, n_results: 5 }),
+      });
+      const data = await res.json();
+      setAnswer(data.answer || "Не удалось получить ответ.");
+    } catch {
+      setAnswer("Ошибка при обращении к Yandex GPT.");
+    } finally {
+      setLoadingAnswer(false);
+    }
+  }
+
   return (
     <div style={styles.background}>
       <div style={styles.page}>
         <h1 style={styles.title}>The Scientific Tangle by Rassol</h1>
         <p style={styles.subtitle}>Спросите, что уже делали с материалом, режимом или свойством</p>
 
+        {/* Поисковая строка */}
         <div style={styles.searchRow}>
           <input
             style={styles.input}
@@ -176,8 +202,25 @@ function App() {
           <button style={styles.button} onClick={handleSearch} disabled={loading}>
             {loading ? "Ищу..." : "Найти"}
           </button>
+          <button style={styles.buttonAsk} onClick={handleAsk} disabled={loadingAnswer}>
+            {loadingAnswer ? "Думаю..." : "Ответ ИИ"}
+          </button>
         </div>
 
+        {/* Блок с ответом Yandex GPT */}
+        {loadingAnswer && (
+          <div style={styles.answerBox}>
+            <p style={styles.hint}>Yandex GPT анализирует документы...</p>
+          </div>
+        )}
+        {answer && (
+          <div style={styles.answerBox}>
+            <div style={styles.answerHeader}>Развёрнутый ответ</div>
+            <p style={styles.answerText}>{answer}</p>
+          </div>
+        )}
+
+        {/* Результаты поиска */}
         <div style={styles.resultsArea}>
           {loading && <p style={styles.hint}>Ищу…</p>}
           {!loading && results === null && <p style={styles.hint}>Введите запрос и нажмите «Найти»</p>}
@@ -207,6 +250,7 @@ function App() {
           ))}
         </div>
 
+        {/* Граф */}
         <h2 style={styles.graphTitle}>Карта связей</h2>
         {graphData.nodes.length === 0 && <p style={styles.hint}>Граф загружается или данных пока нет...</p>}
         <div style={styles.graphWrapper}>
@@ -221,6 +265,7 @@ function App() {
           )}
         </div>
 
+        {/* Легенда */}
         <div style={styles.legend}>
           {[
             ["#435983", "Сплав/Материал"],
@@ -245,9 +290,13 @@ const styles = {
   page:         { maxWidth: 720, margin: "0 auto", padding: "32px 28px", fontFamily: "system-ui, sans-serif", color: "#1a1a2e", background: "#ffffff", borderRadius: 16, border: "1px solid #e0e0e0", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" },
   title:        { fontSize: 32, marginBottom: 4, textAlign: "center" },
   subtitle:     { color: "#666", marginTop: 0, marginBottom: 24, textAlign: "center" },
-  searchRow:    { display: "flex", gap: 8, marginBottom: 28 },
+  searchRow:    { display: "flex", gap: 8, marginBottom: 16 },
   input:        { flex: 1, padding: "12px 14px", fontSize: 16, border: "2px solid #ddd", borderRadius: 8, outline: "none" },
-  button:       { padding: "12px 24px", fontSize: 16, border: "none", borderRadius: 8, background: "#1e430f", color: "white", cursor: "pointer" },
+  button:       { padding: "12px 24px", fontSize: 16, border: "none", borderRadius: 8, background: "#1e430f", color: "white", cursor: "pointer", whiteSpace: "nowrap" },
+  buttonAsk:    { padding: "12px 20px", fontSize: 16, border: "none", borderRadius: 8, background: "#5c3d8f", color: "white", cursor: "pointer", whiteSpace: "nowrap" },
+  answerBox:    { background: "#f3eeff", border: "1px solid #c4a8f0", borderRadius: 12, padding: 20, marginBottom: 20 },
+  answerHeader: { fontWeight: 700, fontSize: 16, marginBottom: 10, color: "#5c3d8f" },
+  answerText:   { margin: 0, lineHeight: 1.7, whiteSpace: "pre-wrap", color: "#1a1a2e" },
   resultsArea:  { display: "flex", flexDirection: "column", gap: 16 },
   hint:         { color: "#999", textAlign: "center" },
   empty:        { color: "#c0392b", textAlign: "center" },
