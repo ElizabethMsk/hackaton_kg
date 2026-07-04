@@ -1,88 +1,38 @@
 import { useState, useRef, useEffect } from "react";
 import { Network } from "vis-network";
 
-//Фейковые данные для результатов поиска
-const FAKE_DATA = [
-  {
-    id: 1,
-    material: "золото",
-    regime: "Отжиг 1050°C",
-    property: "Коррозионная стойкость",
-    summary:
-      "Отжиг при 1050°C повысил коррозионную стойкость за счёт растворения карбидов хрома по границам зёрен.",
-    sources: [
-      "Отчёт №142, лаб. металловедения, 2021",
-      "Статья: Жаростойкие стали, 2019",
-    ],
-  },
-  {
-    id: 2,
-    material: "Сплав ВТ6",
-    regime: "Закалка + старение",
-    property: "Предел прочности",
-    summary:
-      "Двухступенчатая термообработка увеличила предел прочности титанового сплава на ~15%.",
-    sources: ["Эксперимент E-088, 2022"],
-  },
-  {
-    id: 3,
-    material: "Сплав 12Х18Н10Т",
-    regime: "Холодная прокатка",
-    property: "Твёрдость",
-    summary:
-      "Холодная деформация повысила твёрдость, но снизила пластичность. Данных по усталости мало.",
-    sources: ["Отчёт №77, 2020"],
-  },
-];
+const API_URL = "http://localhost:8000";
 
-//Данные графа: узлы (кружки) и рёбра (связи между ними)
-const GRAPH_NODES = [
-  { id: "m1", label: "золото", group: "material" },
-  { id: "m2", label: "Сплав ВТ6", group: "material" },
-  { id: "m3", label: "12Х18Н10Т", group: "material" },
-  { id: "r1", label: "Отжиг 1050°C", group: "regime" },
-  { id: "r2", label: "Закалка+старение", group: "regime" },
-  { id: "r3", label: "Холодная прокатка", group: "regime" },
-  { id: "p1", label: "Коррозионная стойкость", group: "property" },
-  { id: "p2", label: "Предел прочности", group: "property" },
-  { id: "p3", label: "Твёрдость", group: "property" },
-  { id: "e1", label: "Отчёт №142", group: "document" },
-  { id: "e2", label: "Эксперимент E-088", group: "document" },
-];
-
-const GRAPH_EDGES = [
-  { from: "m1", to: "r1" },
-  { from: "r1", to: "p1" },
-  { from: "m1", to: "e1" },
-  { from: "m2", to: "r2" },
-  { from: "r2", to: "p2" },
-  { from: "m2", to: "e2" },
-  { from: "m3", to: "r3" },
-  { from: "r3", to: "p3" },
-];
-
-//Цвета для каждого типа узла
+//Цвета для типов узлов
 const GROUP_STYLES = {
-  material: { color: "#435983", shape: "box" },
-  regime: { color: "#e4f643", shape: "box" },
-  property: { color: "#52dc95", shape: "box" },
-  document: { color: "#d7b2eb", shape: "box" },
+  ALLOY: { color: "#435983", shape: "box" },
+  PROPERTY: { color: "#52dc95", shape: "box" },
+  PROPERTY_VALUE: { color: "#7fd8a8", shape: "box" },
+  ORG: { color: "#e08a3c", shape: "box" },
+  PER: { color: "#d7b2eb", shape: "box" },
+  LOC: { color: "#6fb8e0", shape: "box" },
+  UNKNOWN: { color: "#b0b0b8", shape: "box" },
 };
 
-//Находит id узлов, которые надо подсветить (сами совпавшие + их прямые соседи)
-function getHighlightIds(q) {
+const DEFAULT_STYLE = { color: "#b0b0b8", shape: "box" };
+
+function styleFor(node) {
+  const key = node.type || node.group;
+  return GROUP_STYLES[key] || DEFAULT_STYLE;
+}
+
+//Находит id узлов для подсветки (совпавшие + прямые соседи)
+function getHighlightIds(q, nodesData, edgesData) {
   if (q === "") return null;
 
-  //сначала какие узлы сами совпали с запросом
   const matched = new Set(
-    GRAPH_NODES.filter((n) => n.label.toLowerCase().includes(q)).map(
-      (n) => n.id,
-    ),
+    nodesData
+      .filter((n) => (n.label || "").toLowerCase().includes(q))
+      .map((n) => n.id),
   );
 
-  //к ним добавляем соседей по рёбрам
   const ids = new Set(matched);
-  GRAPH_EDGES.forEach((e) => {
+  edgesData.forEach((e) => {
     if (matched.has(e.from)) ids.add(e.to);
     if (matched.has(e.to)) ids.add(e.from);
   });
@@ -90,14 +40,15 @@ function getHighlightIds(q) {
   return ids;
 }
 
-//Строит массив узлов (highlightIds === null -> все яркие. Иначе яркие только те узлы, чей id есть в наборе)
-function buildNodes(highlightIds) {
-  return GRAPH_NODES.map((n) => {
+function buildNodes(nodesData, highlightIds) {
+  return nodesData.map((n) => {
     const isOn = highlightIds === null || highlightIds.has(n.id);
+    const st = styleFor(n);
     return {
-      ...n,
-      color: isOn ? GROUP_STYLES[n.group].color : "#dcdce5",
-      shape: GROUP_STYLES[n.group].shape,
+      id: n.id,
+      label: n.label,
+      color: isOn ? st.color : "#dcdce5",
+      shape: st.shape,
       font: { color: isOn ? "#1a1a2e" : "#b0b0b0", size: 14 },
       size: 18,
       shadow: { enabled: true, size: 8, color: "rgba(0,0,0,0.2)" },
@@ -109,17 +60,38 @@ function App() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
 
-  //закладка, где будет "жить" граф
   const graphRef = useRef(null);
-  //закладка на сам граф, чтобы потом его обновлять при поиске (перерисовывать)
   const networkRef = useRef(null);
 
-  //запускается один раз после отрисовки - строит граф
+  //Загружаем граф с бэка при старте
+  useEffect(() => {
+    async function loadGraph() {
+      try {
+        const res = await fetch(`${API_URL}/graph`);
+        const data = await res.json();
+        setGraphData({
+          nodes: data.nodes || [],
+          edges: data.edges || [],
+        });
+      } catch (err) {
+        console.error("Не удалось загрузить граф с бэка:", err);
+      }
+    }
+    loadGraph();
+  }, []);
+
+  //Рисуем граф, когда данные пришли
   useEffect(() => {
     if (!graphRef.current) return;
+    if (graphData.nodes.length === 0) return;
 
-    const data = { nodes: buildNodes(null), edges: GRAPH_EDGES };
+    const data = {
+      nodes: buildNodes(graphData.nodes, null),
+      edges: graphData.edges,
+    };
 
     const options = {
       nodes: { borderWidth: 0 },
@@ -145,51 +117,55 @@ function App() {
     };
 
     const network = new Network(graphRef.current, data, options);
-    networkRef.current = network; //сохраняем граф для обновлений
+    networkRef.current = network;
 
-    //клик по узлу => запоминаем, какой выбрали
     network.on("click", (params) => {
       if (params.nodes.length > 0) {
         const clickedId = params.nodes[0];
-        const node = GRAPH_NODES.find((n) => n.id === clickedId);
+        const node = graphData.nodes.find((n) => n.id === clickedId);
         setSelectedNode(node);
       } else {
         setSelectedNode(null);
       }
     });
 
-    //уборка при перерисовке
     return () => network.destroy();
-  }, []);
+  }, [graphData]);
 
-  function handleSearch() {
+  async function handleSearch() {
     const q = query.trim().toLowerCase();
-    if (q === "") {
-      setResults([]);
-      //сбрасываем подсветку графа (все узлы снова яркие)
-      if (networkRef.current) {
-        networkRef.current.setData({
-          nodes: buildNodes(null),
-          edges: GRAPH_EDGES,
-        });
-      }
-      return;
-    }
-    const found = FAKE_DATA.filter(
-      (item) =>
-        item.material.toLowerCase().includes(q) ||
-        item.regime.toLowerCase().includes(q) ||
-        item.property.toLowerCase().includes(q) ||
-        item.summary.toLowerCase().includes(q),
-    );
-    setResults(found);
 
-    //подсвечиваем в графе узлы, подходящие под запрос
+    //подсветка графа
     if (networkRef.current) {
       networkRef.current.setData({
-        nodes: buildNodes(getHighlightIds(q)),
-        edges: GRAPH_EDGES,
+        nodes: buildNodes(
+          graphData.nodes,
+          getHighlightIds(q, graphData.nodes, graphData.edges),
+        ),
+        edges: graphData.edges,
       });
+    }
+
+    if (q === "") {
+      setResults([]);
+      return;
+    }
+
+    //реальный поиск через бэк
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query.trim(), n_results: 5 }),
+      });
+      const data = await res.json();
+      setResults(data.results || []);
+    } catch (err) {
+      console.error("Ошибка поиска на бэке:", err);
+      setResults([]);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -220,33 +196,46 @@ function App() {
 
         {/* Область результатов */}
         <div style={styles.resultsArea}>
-          {results === null && (
+          {loading && <p style={styles.hint}>Ищу…</p>}
+
+          {!loading && results === null && (
             <p style={styles.hint}>Введите запрос и нажмите «Найти»</p>
           )}
 
-          {results !== null && results.length === 0 && (
+          {!loading && results !== null && results.length === 0 && (
             <p style={styles.empty}>
               Ничего не найдено. Возможно, по этому запросу данных пока мало.
             </p>
           )}
 
-          {results !== null &&
-            results.map((item) => (
-              <div key={item.id} style={styles.card}>
+          {!loading &&
+            results !== null &&
+            results.map((item, idx) => (
+              <div key={item.id || idx} style={styles.card}>
                 <div style={styles.cardTags}>
-                  <span style={styles.tagMaterial}>{item.material}</span>
-                  <span style={styles.tagRegime}>{item.regime}</span>
-                  <span style={styles.tagProperty}>{item.property}</span>
+                  {item.material && (
+                    <span style={styles.tagMaterial}>{item.material}</span>
+                  )}
+                  {item.regime && (
+                    <span style={styles.tagRegime}>{item.regime}</span>
+                  )}
+                  {item.property && (
+                    <span style={styles.tagProperty}>{item.property}</span>
+                  )}
                 </div>
-                <p style={styles.cardSummary}>{item.summary}</p>
-                <div style={styles.sources}>
-                  <strong>Источники:</strong>
-                  <ul style={styles.sourceList}>
-                    {item.sources.map((src, i) => (
-                      <li key={i}>{src}</li>
-                    ))}
-                  </ul>
-                </div>
+                <p style={styles.cardSummary}>
+                  {item.summary || item.text || item.document || ""}
+                </p>
+                {item.sources && (
+                  <div style={styles.sources}>
+                    <strong>Источники:</strong>
+                    <ul style={styles.sourceList}>
+                      {item.sources.map((src, i) => (
+                        <li key={i}>{src}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             ))}
         </div>
@@ -256,7 +245,6 @@ function App() {
         <div style={styles.graphWrapper}>
           <div ref={graphRef} style={styles.graph} />
 
-          {/* Панель деталей выбранного узла */}
           {selectedNode && (
             <div style={styles.detailPanel}>
               <div
@@ -267,7 +255,7 @@ function App() {
               </div>
               <h3 style={styles.detailTitle}>{selectedNode.label}</h3>
               <p style={styles.detailType}>
-                Тип: {translateGroup(selectedNode.group)}
+                Тип: {translateGroup(selectedNode.type || selectedNode.group)}
               </p>
               <p style={styles.detailHint}>
                 Здесь появятся связанные документы, история и пробелы в данных.
@@ -276,23 +264,23 @@ function App() {
           )}
         </div>
 
-        {/* Легенда: что значат цвета */}
+        {/* Легенда */}
         <div style={styles.legend}>
           <span style={styles.legendItem}>
             <span style={{ ...styles.legendDot, background: "#435983" }} />{" "}
-            Материал
-          </span>
-          <span style={styles.legendItem}>
-            <span style={{ ...styles.legendDot, background: "#e4f643" }} />{" "}
-            Режим
+            Сплав
           </span>
           <span style={styles.legendItem}>
             <span style={{ ...styles.legendDot, background: "#52dc95" }} />{" "}
             Свойство
           </span>
           <span style={styles.legendItem}>
+            <span style={{ ...styles.legendDot, background: "#e08a3c" }} />{" "}
+            Организация
+          </span>
+          <span style={styles.legendItem}>
             <span style={{ ...styles.legendDot, background: "#d7b2eb" }} />{" "}
-            Документ
+            Человек
           </span>
         </div>
       </div>
@@ -300,15 +288,17 @@ function App() {
   );
 }
 
-//переводит код группы в русское слово
 function translateGroup(group) {
   const map = {
-    material: "Материал",
-    regime: "Режим обработки",
-    property: "Свойство",
-    document: "Документ",
+    ALLOY: "Сплав",
+    PROPERTY: "Свойство",
+    PROPERTY_VALUE: "Значение свойства",
+    ORG: "Организация",
+    PER: "Человек",
+    LOC: "Место",
+    UNKNOWN: "Неизвестно",
   };
-  return map[group] || group;
+  return map[group] || group || "—";
 }
 
 const styles = {
@@ -388,7 +378,6 @@ const styles = {
   sources: { fontSize: 14, color: "#555" },
   sourceList: { margin: "6px 0 0", paddingLeft: 20 },
 
-  //стили графа
   graphTitle: {
     fontSize: 22,
     marginTop: 32,
