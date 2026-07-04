@@ -1,6 +1,12 @@
 import json
 import os
 import sys
+import httpx
+from dotenv import load_dotenv
+load_dotenv()
+
+YANDEX_API_KEY = os.getenv("YANDEX_API_KEY")
+YANDEX_FOLDER_ID = os.getenv("YANDEX_FOLDER_ID")
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, UploadFile, File
@@ -285,3 +291,63 @@ def auto_gaps():
         return summary
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+class AskRequest(BaseModel):
+    query: str
+    n_results: int = 5
+
+@app.post("/ask")
+async def ask(req: AskRequest):
+    # 1. Ищем релевантные куски
+    try:
+        raw_results = search.search(req.query, n_results=req.n_results)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    # 2. Собираем контекст из найденных документов
+    context = "\n\n".join([
+        f"Источник: {r.get('metadata', {}).get('filename', '?')}\n{r.get('document', '')}"
+        for r in raw_results
+    ])
+
+    # 3. Отправляем в Yandex GPT
+    prompt = f"""Ты — аналитическая система для горно-металлургических исследований.
+На основе найденных документов дай структурированный ответ на вопрос.
+Указывай источники. Если данных недостаточно — скажи об этом явно.
+
+Вопрос: {req.query}
+
+Найденные документы:
+{context}
+
+Дай структурированный ответ с указанием источников."""
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                "https://llm.api.cloud.yandex.net/foundationModels/v1/completion",
+                headers={
+                    "Authorization": f"Api-Key {YANDEX_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "modelUri": f"gpt://{YANDEX_FOLDER_ID}/yandexgpt-lite",
+                    "completionOptions": {
+                        "stream": False,
+                        "temperature": 0.3,
+                        "maxTokens": 1500,
+                    },
+                    "messages": [
+                        {"role": "user", "text": prompt}
+                    ],
+                }
+            )
+            result = resp.json()
+            answer = result["result"]["alternatives"][0]["message"]["text"]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Yandex GPT error: {str(e)}")
+
+    return {
+        "query": req.query,
+        "answer": answer,
+        "sources": raw_results,
+    }
