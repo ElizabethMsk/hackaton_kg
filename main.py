@@ -300,43 +300,61 @@ class AskRequest(BaseModel):
 
 @app.post("/ask")
 async def ask(req: AskRequest):
+    # 1. Ищем релевантные документы
     try:
         raw_results = search.search(req.query, n_results=req.n_results)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Search error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
     if not raw_results:
-        return {
-            "query": req.query,
-            "answer": "По вашему запросу ничего не найдено в базе знаний. Попробуйте переформулировать вопрос.",
-            "sources": []
-        }
+        return {"query": req.query, "answer": "По запросу ничего не найдено.", "sources": []}
 
-    # Формируем структурированный ответ на основе найденных документов
-    sources_text = []
-    for i, r in enumerate(raw_results[:5], 1):
-        doc = r.get('document', '')[:500]
-        filename = r.get('metadata', {}).get('filename', f'Документ {i}')
-        sources_text.append(f"""
-📄 **Источник {i}: {filename}**
-{doc}...
-""")
+    # 2. Пробуем Yandex GPT
+    context = "\n\n".join([
+        f"Источник: {r.get('metadata', {}).get('filename', '?')}\n{r.get('document', '')}"
+        for r in raw_results
+    ])
+    prompt = f"""Ты — аналитическая система для горно-металлургических исследований.
+На основе найденных документов дай структурированный ответ на вопрос.
+Указывай источники. Если данных недостаточно — скажи об этом явно.
 
-    answer = f"""**Результаты поиска по запросу:** "{req.query}"
+Вопрос: {req.query}
 
-Найдено {len(raw_results)} релевантных документов.
+Найденные документы:
+{context}
 
-{chr(10).join(sources_text)}
+Дай структурированный ответ с указанием источников."""
 
----
-💡 **Важно**: Для генерации развернутых ответов используется Yandex GPT, но в данный момент API-доступ временно ограничен организаторами хакатона. 
-Представленная выше информация получена прямым поиском по базе знаний.
-"""
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.post(
+                "https://llm.api.cloud.yandex.net/foundationModels/v1/completion",
+                headers={
+                    "Authorization": f"Api-Key {YANDEX_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "modelUri": f"gpt://{YANDEX_FOLDER_ID}/yandexgpt-lite",
+                    "completionOptions": {"stream": False, "temperature": 0.3, "maxTokens": 1500},
+                    "messages": [{"role": "user", "text": prompt}],
+                }
+            )
+            result = resp.json()
+            answer = result["result"]["alternatives"][0]["message"]["text"]
+            return {"query": req.query, "answer": answer, "sources": raw_results}
 
-    return {
-        "query": req.query,
-        "answer": answer,
-        "sources": raw_results[:5],
-        "mode": "offline",
-        "note": "Yandex GPT временно недоступен"
-    }
+    except Exception:
+        # 3. Если GPT недоступен — красивая заглушка
+        sources_list = "\n".join([
+            f"• {r.get('metadata', {}).get('filename', '?')} "
+            f"({r.get('metadata', {}).get('folder', '?')}) — "
+            f"релевантность {round(r.get('similarity', 0) * 100)}%"
+            for r in raw_results
+        ])
+        answer = (
+            f"По запросу «{req.query}» найдено {len(raw_results)} документов:\n\n"
+            f"{sources_list}\n\n"
+            f"⚠️ Yandex GPT сейчас недоступен — показан прямой поиск по базе знаний.\n"
+            f"Для просмотра фрагментов используйте кнопку «Найти»."
+        )
+        return {"query": req.query, "answer": answer, "sources": raw_results}

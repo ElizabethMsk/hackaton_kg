@@ -138,13 +138,6 @@ function App() {
       return;
     }
 
-    if (networkRef.current) {
-      networkRef.current.setData({
-        nodes: buildVisNodes(graphData.nodes, getHighlightIds(q.toLowerCase(), graphData.nodes, graphData.edges)),
-        edges: graphData.edges,
-      });
-    }
-
     setLoading(true);
     setAnswer(null);
     try {
@@ -155,6 +148,24 @@ function App() {
       });
       const data = await res.json();
       setResults(data.results || []);
+
+      // подсвечиваем узлы которые встречаются в найденных документах
+      if (networkRef.current) {
+        const foundIds = new Set();
+        (data.results || []).forEach((item) => {
+          const doc = (item.document || item.text || "").toLowerCase();
+          graphData.nodes.forEach((node) => {
+            if (node.label && node.label.length > 2 && doc.includes(node.label.toLowerCase())) {
+              foundIds.add(node.id);
+            }
+          });
+        });
+        const highlightIds = foundIds.size > 0 ? foundIds : getHighlightIds(q.toLowerCase(), graphData.nodes, graphData.edges);
+        networkRef.current.setData({
+          nodes: buildVisNodes(graphData.nodes, highlightIds && highlightIds.size > 0 ? highlightIds : null),
+          edges: graphData.edges,
+        });
+      }
     } catch {
       setResults([]);
     } finally {
