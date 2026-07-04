@@ -42,7 +42,7 @@ desktop.ini
 # Jupyter notebooks (если будете использовать)
 .ipynb_checkpoints/
 
-ml/config.py
+ml/config.json
 config.py
 .env
 

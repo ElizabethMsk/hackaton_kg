@@ -9,69 +9,63 @@ print("=" * 60)
 print("RAG ПОИСК С YANDEX GPT")
 print("=" * 60)
 
-# ============================================================
+
 # 1. Загрузка конфигурации
-# ============================================================
+
 print("\n[1/4] Загрузка конфигурации...")
 
-# Пробуем загрузить конфиг
-config_path = os.path.join(os.path.dirname(__file__), 'config.py')
-config = {}
-
+# СТАЛО (безопасно и работает с новым config.json):
+config_path = os.path.join(os.path.dirname(__file__), 'config.json')
 try:
     with open(config_path, 'r', encoding='utf-8') as f:
-        exec(f.read(), config)
-    
-    YANDEX_GPT_API_KEY = config.get('YANDEX_GPT_API_KEY')
-    YANDEX_GPT_FOLDER_ID = config.get('YANDEX_GPT_FOLDER_ID')
+        config = json.load(f)
+    YANDEX_GPT_API_KEY = config["yandex_gpt"]["api_key"]
+    YANDEX_GPT_FOLDER_ID = config["yandex_gpt"]["folder_id"]
     
     if not YANDEX_GPT_API_KEY or not YANDEX_GPT_FOLDER_ID:
-        print("   ❌ Ошибка: Не найдены ключи Yandex GPT в config.py")
-        print("   Добавьте в ml/config.py:")
-        print("   YANDEX_GPT_API_KEY = 'ваш_ключ'")
-        print("   YANDEX_GPT_FOLDER_ID = 'ваш_folder_id'")
+        print("   Ошибка: Не найдены ключи Yandex GPT")
         sys.exit(1)
     
-    print("   ✅ Конфигурация загружена")
+    print("    Конфигурация загружена")
     print(f"   API Key: {YANDEX_GPT_API_KEY[:10]}...")
     print(f"   Folder ID: {YANDEX_GPT_FOLDER_ID}")
-    
-except Exception as e:
-    print(f"   ❌ Ошибка загрузки конфига: {e}")
+except FileNotFoundError:
+    print(f"    Файл не найден: {config_path}")
+    print("   Создайте файл ml/config.json")
+    sys.exit(1)
+except json.JSONDecodeError as e:
+    print(f"    Ошибка парсинга JSON: {e}")
+    sys.exit(1)
+except KeyError as e:
+    print(f"    Отсутствует ключ в конфиге: {e}")
     sys.exit(1)
 
-# ============================================================
 # 2. Загрузка модели эмбеддингов
-# ============================================================
 print("\n[2/4] Загрузка модели эмбеддингов...")
 
 try:
     model = SentenceTransformer(
         "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     )
-    print("   ✅ Модель загружена!")
+    print("    Модель загружена!")
 except Exception as e:
-    print(f"   ❌ Ошибка загрузки модели: {e}")
+    print(f"   Ошибка загрузки модели: {e}")
     sys.exit(1)
 
-# ============================================================
 # 3. Подключение к ChromaDB
-# ============================================================
 print("\n[3/4] Подключение к векторной базе...")
 
 try:
     client = chromadb.PersistentClient(path="./vector_db")
     collection = client.get_collection("articles")
-    print(f"   ✅ Подключено к базе: ./vector_db")
+    print(f"    Подключено к базе: ./vector_db")
     print(f"   Всего документов: {collection.count()}")
 except Exception as e:
-    print(f"   ❌ Ошибка подключения к ChromaDB: {e}")
+    print(f"    Ошибка подключения к ChromaDB: {e}")
     print("   Сначала запустите: python 04_embeddings.py")
     sys.exit(1)
 
-# ============================================================
 # 4. Класс для работы с Yandex GPT
-# ============================================================
 print("\n[4/4] Инициализация Yandex GPT...")
 
 class YandexGPTClient:
@@ -131,17 +125,15 @@ class YandexGPTClient:
             return answer.strip()
             
         except requests.exceptions.Timeout:
-            return "⏱️  Превышено время ожидания ответа от Yandex GPT. Попробуйте ещё раз."
+            return " Превышено время ожидания ответа от Yandex GPT. Попробуйте ещё раз."
         except Exception as e:
-            return f"❌ Ошибка при обращении к Yandex GPT: {str(e)[:200]}"
+            return f" Ошибка при обращении к Yandex GPT: {str(e)[:200]}"
 
 # Инициализация клиента
 gpt_client = YandexGPTClient(YANDEX_GPT_API_KEY, YANDEX_GPT_FOLDER_ID)
-print("   ✅ Yandex GPT готов к работе!")
+print("    Yandex GPT готов к работе!")
 
-# ============================================================
 # 5. Функция поиска и генерации ответа
-# ============================================================
 def search_and_answer(query, n_results=3):
     """
     Поиск релевантных документов и генерация ответа
@@ -153,7 +145,7 @@ def search_and_answer(query, n_results=3):
     Returns:
         dict с ответом и источниками
     """
-    print(f"\n🔍 Поиск в базе знаний...")
+    print(f"\n Поиск в базе знаний...")
     
     # 1. Создаём эмбеддинг запроса
     query_embedding = model.encode([query])[0]
@@ -189,7 +181,7 @@ def search_and_answer(query, n_results=3):
     context = "\n\n".join(context_parts)
     
     # 4. Генерируем ответ через GPT
-    print(f"🤖 Генерация ответа через Yandex GPT...")
+    print(f" Генерация ответа через Yandex GPT...")
     answer = gpt_client.generate_answer(query, context)
     
     return {
@@ -198,9 +190,7 @@ def search_and_answer(query, n_results=3):
         "context": context
     }
 
-# ============================================================
 # 6. Интерактивный режим
-# ============================================================
 print("\n" + "=" * 60)
 print("ГОТОВО! Задавайте вопросы")
 print("=" * 60)
@@ -231,11 +221,11 @@ if mode == "1":
         
         result = search_and_answer(query, n_results=3)
         
-        print("\n💡 ОТВЕТ СИСТЕМЫ:")
+        print("\n ОТВЕТ СИСТЕМЫ:")
         print("-" * 60)
         print(result["answer"])
         
-        print("\n📚 ИСТОЧНИКИ:")
+        print("\n ИСТОЧНИКИ:")
         print("-" * 60)
         for source in result["sources"]:
             print(f"\n[{source['index']}] Страница {source['page']} (похожесть: {source['similarity']:.2%})")
@@ -245,17 +235,17 @@ if mode == "1":
             input("\nНажмите Enter для следующего вопроса...")
     
     print("\n" + "=" * 60)
-    print("✅ Тестовый режим завершён!")
+    print(" Тестовый режим завершён!")
     print("=" * 60)
 
 else:
     # Интерактивный режим
     while True:
         try:
-            query = input("\n❓ Ваш вопрос: ").strip()
+            query = input("\n Ваш вопрос: ").strip()
             
             if query.lower() in ['exit', 'quit', 'выход', 'q']:
-                print("\n👋 До свидания!")
+                print("\n До свидания!")
                 break
             
             if not query:
@@ -264,12 +254,12 @@ else:
             result = search_and_answer(query, n_results=3)
             
             print("\n" + "=" * 60)
-            print("💡 ОТВЕТ:")
+            print(" ОТВЕТ:")
             print("=" * 60)
             print(result["answer"])
             
             print("\n" + "=" * 60)
-            print("📚 ИСТОЧНИКИ:")
+            print(" ИСТОЧНИКИ:")
             print("=" * 60)
             for source in result["sources"]:
                 print(f"\n[{source['index']}] Страница {source['page']} (похожесть: {source['similarity']:.2%})")
@@ -278,10 +268,10 @@ else:
             print("\n" + "-" * 60)
             
         except KeyboardInterrupt:
-            print("\n\n👋 До свидания!")
+            print("\n\n До свидания!")
             break
         except Exception as e:
-            print(f"\n❌ Произошла ошибка: {e}")
+            print(f"\n Произошла ошибка: {e}")
             print("Попробуйте ещё раз")
 
 print("\nСпасибо за использование RAG поиска!")

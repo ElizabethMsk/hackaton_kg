@@ -1,0 +1,166 @@
+{
+  "test_cases": [
+    {
+      "id": 1,
+      "text": "При электроэкстракции никеля скорость циркуляции католита составляет 0.3-0.5 м/с. Концентрация сульфатов в воде не должна превышать 300 мг/л.",
+      "entities": [
+        {"text": "электроэкстракции", "label": "PROCESS"},
+        {"text": "никеля", "label": "MATERIAL"},
+        {"text": "католита", "label": "MATERIAL"},
+        {"text": "0.3-0.5 м/с", "label": "NUMERIC_CONSTRAINT"},
+        {"text": "сульфатов", "label": "MATERIAL"},
+        {"text": "300 мг/л", "label": "NUMERIC_CONSTRAINT"}
+      ]
+    },
+    {
+      "id": 2,
+      "text": "В России (Норильск) используют печи взвешенной плавки (ПВП) для переработки штейна. В США применяется кучное выщелачивание медных руд.",
+      "entities": [
+        {"text": "России", "label": "GEO_RU"},
+        {"text": "Норильск", "label": "GEO_RU"},
+        {"text": "печи взвешенной плавки", "label": "EQUIPMENT"},
+        {"text": "ПВП", "label": "EQUIPMENT"},
+        {"text": "штейна", "label": "MATERIAL"},
+        {"text": "США", "label": "GEO_INTL"},
+        {"text": "кучное выщелачивание", "label": "PROCESS"},
+        {"text": "медных", "label": "MATERIAL"},
+        {"text": "руд", "label": "MATERIAL"}
+      ]
+    },
+    {
+      "id": 3,
+      "text": "Распределение Au и Ag между медным штейном и шлаком зависит от температуры плавки.",
+      "entities": [
+        {"text": "Au", "label": "MATERIAL"},
+        {"text": "Ag", "label": "MATERIAL"},
+        {"text": "медным", "label": "MATERIAL"},
+        {"text": "штейном", "label": "MATERIAL"},
+        {"text": "шлаком", "label": "MATERIAL"}
+      ]
+    },
+    {
+      "id": 4,
+      "text": "Обессоливание воды на обогатительной фабрике применяют при содержании хлоридов до 200 мг/л и сульфатов до 300 мг/л.",
+      "entities": [
+        {"text": "Обессоливание", "label": "PROCESS"},
+        {"text": "хлоридов", "label": "MATERIAL"},
+        {"text": "200 мг/л", "label": "NUMERIC_CONSTRAINT"},
+        {"text": "сульфатов", "label": "MATERIAL"},
+        {"text": "300 мг/л", "label": "NUMERIC_CONSTRAINT"}
+      ]
+    },
+    {
+      "id": 5,
+      "text": "Платина и палладий извлекаются из медно-никелевых концентратов методом электролиза.",
+      "entities": [
+        {"text": "Платина", "label": "MATERIAL"},
+        {"text": "палладий", "label": "MATERIAL"},
+        {"text": "медно-никелевых", "label": "MATERIAL"},
+        {"text": "концентратов", "label": "MATERIAL"},
+        {"text": "электролиза", "label": "PROCESS"}
+      ]
+    },
+    {
+      "id": 6,
+      "text": "Температура плавки 1200-1300°C обеспечивает полное разделение штейна и шлака. Время выдержки составляет 2 часа.",
+      "entities": [
+        {"text": "1200-1300°C", "label": "NUMERIC_CONSTRAINT"},
+        {"text": "плавки", "label": "PROCESS"},
+        {"text": "штейна", "label": "MATERIAL"},
+        {"text": "шлака", "label": "MATERIAL"},
+        {"text": "2 часа", "label": "NUMERIC_CONSTRAINT"}
+      ]
+    },
+    {
+      "id": 7,
+      "text": "В Канаде и Австралии используют автоклавы для выщелачивания под давлением.",
+      "entities": [
+        {"text": "Канаде", "label": "GEO_INTL"},
+        {"text": "Австралии", "label": "GEO_INTL"},
+        {"text": "автоклав", "label": "EQUIPMENT"},
+        {"text": "выщелачивания", "label": "PROCESS"}
+      ]
+    },
+    {
+      "id": 8,
+      "text": "Количество кислорода в печи не должно превышать 5%. Давление составляет 100-150 кПа.",
+      "entities": [
+        {"text": "5%", "label": "NUMERIC_CONSTRAINT"},
+        {"text": "100-150 кПа", "label": "NUMERIC_CONSTRAINT"}
+      ]
+    },
+    {
+      "id": 9,
+      "text": "Электролизеры и диафрагменные ячейки применяются для рафинирования меди и никеля.",
+      "entities": [
+        {"text": "Электролизеры", "label": "EQUIPMENT"},
+        {"text": "диафрагменные ячейки", "label": "EQUIPMENT"},
+        {"text": "рафинирования", "label": "PROCESS"},
+        {"text": "меди", "label": "MATERIAL"},
+        {"text": "никеля", "label": "MATERIAL"}
+      ]
+    },
+    {
+      "id": 10,
+      "text": "На Урале и в Сибири разрабатываются месторождения железных и медных руд.",
+      "entities": [
+        {"text": "Урале", "label": "GEO_RU"},
+        {"text": "Сибири", "label": "GEO_RU"},
+        {"text": "железных", "label": "MATERIAL"},
+        {"text": "медных", "label": "MATERIAL"},
+        {"text": "руд", "label": "MATERIAL"}
+      ]
+    },
+    {
+      "id": 11,
+      "text": "Концентрация кобальта в растворе не должна превышать 50 мг/л при температуре 60°C.",
+      "entities": [
+        {"text": "кобальта", "label": "MATERIAL"},
+        {"text": "50 мг/л", "label": "NUMERIC_CONSTRAINT"},
+        {"text": "60°C", "label": "NUMERIC_CONSTRAINT"}
+      ]
+    },
+    {
+      "id": 12,
+      "text": "Гидрометаллургия и пирометаллургия — два основных направления переработки руд.",
+      "entities": [
+        {"text": "Гидрометаллургия", "label": "PROCESS"},
+        {"text": "пирометаллургия", "label": "PROCESS"},
+        {"text": "переработки", "label": "PROCESS"},
+        {"text": "руд", "label": "MATERIAL"}
+      ]
+    },
+    {
+      "id": 13,
+      "text": "В Чили и ЮАР применяется сорбционное извлечение золота из цианистых растворов.",
+      "entities": [
+        {"text": "Чили", "label": "GEO_INTL"},
+        {"text": "ЮАР", "label": "GEO_INTL"},
+        {"text": "сорбционное", "label": "PROCESS"},
+        {"text": "извлечение", "label": "PROCESS"},
+        {"text": "золота", "label": "MATERIAL"}
+      ]
+    },
+    {
+      "id": 14,
+      "text": "Шахтные печи и конвертеры используются для обжига сульфидных концентратов при 800-900°C.",
+      "entities": [
+        {"text": "Шахтные печи", "label": "EQUIPMENT"},
+        {"text": "конвертеры", "label": "EQUIPMENT"},
+        {"text": "обжига", "label": "PROCESS"},
+        {"text": "сульфидных", "label": "MATERIAL"},
+        {"text": "концентратов", "label": "MATERIAL"},
+        {"text": "800-900°C", "label": "NUMERIC_CONSTRAINT"}
+      ]
+    },
+    {
+      "id": 15,
+      "text": "Аффинаж серебра проводят электролизом при плотности тока 200 А/м².",
+      "entities": [
+        {"text": "Аффинаж", "label": "PROCESS"},
+        {"text": "серебра", "label": "MATERIAL"},
+        {"text": "электролизом", "label": "PROCESS"}
+      ]
+    }
+  ]
+}

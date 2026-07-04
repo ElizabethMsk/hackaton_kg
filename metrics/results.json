@@ -1,0 +1,17 @@
+{
+  "summary": {
+    "best_method": "MiningNER",
+    "results": {
+      "MaterialNER": {
+        "avg_precision": 0.0,
+        "avg_recall": 0.0,
+        "avg_f1": 0.0
+      },
+      "MiningNER": {
+        "avg_precision": 0.7598412698412698,
+        "avg_recall": 0.7462962962962963,
+        "avg_f1": 0.7381217976870149
+      }
+    }
+  }
+}

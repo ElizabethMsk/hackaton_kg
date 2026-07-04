@@ -1,7 +1,10 @@
 """
 ML Pipeline — связывает все модули вместе
 """
-from .custom_ner import MaterialNER
+try:
+    from .mining_ner import MiningNER
+except ImportError:
+    from .custom_ner import MaterialNER as MiningNER
 from .chunker import TextChunker
 from .ranking import ResultRanker
 from .gaps import GapAnalyzer
@@ -10,7 +13,12 @@ class MLPipeline:
     """Основной пайплайн обработки документов"""
     
     def __init__(self):
-        self.ner = MaterialNER()
+        try:
+             from .mining_ner import MiningNER
+        except ImportError:
+             from .custom_ner import MaterialNER as MiningNER
+         
+        self.ner = MiningNER()
         self.chunker = TextChunker()
         self.ranker = ResultRanker()
         self.gap_analyzer = GapAnalyzer()
@@ -107,5 +115,5 @@ if __name__ == "__main__":
     print(f"Пробелов покрытия: {summary['coverage_gaps']}")
     print(f"Противоречий: {summary['contradictions']}")
     
-    print("\n✅ Pipeline работает!")
+    print("\n Pipeline работает!")
     
