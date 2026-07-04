@@ -64,24 +64,24 @@ LABEL_MAP = {
     "PROPERTY_VALUE": ("property", "Свойство"),
 }
 
+
 def entities_to_graph(entities: list) -> dict:
-    """
-    Конвертирует список сущностей в {nodes, edges} для vis-network/Cytoscape.
-    Рёбра строятся между сущностями которые встречаются рядом в тексте (в пределах 1500 символов).
-    """
-    # 1. Собираем уникальные узлы (дедупликация по тексту в нижнем регистре)
+    STOP_WORDS = {"рис", "ист", "таблица", "табл", "рф", "сп", "по", "pp", "st", "cu", "as", "pb", "2"}
+
     seen = {}
     for ent in entities:
         key = ent.get("text", "").strip().lower()
         if not key or len(key) < 2:
             continue
+        if key in STOP_WORDS:
+            continue
         if key not in seen:
             label = ent.get("label", "ORG")
             node_type, _ = LABEL_MAP.get(label, ("other", "Другое"))
             seen[key] = {
-                "id":    f"{node_type}_{key[:30]}".replace(" ", "_"),
+                "id": f"{node_type}_{key[:30]}".replace(" ", "_"),
                 "label": ent.get("text", "").strip()[:40],
-                "type":  node_type,
+                "type": node_type,
                 "count": 1,
                 "positions": [ent.get("start", 0)],
             }
@@ -89,23 +89,15 @@ def entities_to_graph(entities: list) -> dict:
             seen[key]["count"] += 1
             seen[key]["positions"].append(ent.get("start", 0))
 
-    # 2. Берём топ-80 узлов по частоте (чтобы граф не был перегружен)
     top_nodes = sorted(seen.values(), key=lambda x: -x["count"])[:80]
-    node_ids  = {n["id"] for n in top_nodes}
+    node_ids = {n["id"] for n in top_nodes}
+    nodes_out = [{"id": n["id"], "label": n["label"], "type": n["type"]} for n in top_nodes]
 
-    nodes_out = [
-        {"id": n["id"], "label": n["label"], "type": n["type"]}
-        for n in top_nodes
-    ]
-
-    # 3. Строим рёбра: две сущности связаны если их позиции в тексте < 1500 символов
-    # Используем исходный список сущностей (не дедуплицированный)
     proximity = 1500
     edges_set = set()
     edges_out = []
-
-    # Индексируем: для каждой позиции — какой node_id
     pos_to_node = []
+
     for ent in entities:
         key = ent.get("text", "").strip().lower()
         if key not in seen:
@@ -117,7 +109,6 @@ def entities_to_graph(entities: list) -> dict:
 
     pos_to_node.sort(key=lambda x: x[0])
 
-    # Соединяем соседей в окне proximity
     for i, (pos_i, id_i) in enumerate(pos_to_node):
         for j in range(i + 1, len(pos_to_node)):
             pos_j, id_j = pos_to_node[j]
@@ -129,14 +120,12 @@ def entities_to_graph(entities: list) -> dict:
             if edge_key not in edges_set:
                 edges_set.add(edge_key)
                 edges_out.append({"from": id_i, "to": id_j})
-                if len(edges_out) >= 200:  # лимит рёбер
+                if len(edges_out) >= 200:
                     break
         if len(edges_out) >= 200:
             break
 
     return {"nodes": nodes_out, "edges": edges_out}
-
-
 # ── Схемы запросов ───────────────────────────────────────────
 class SearchRequest(BaseModel):
     query: str
